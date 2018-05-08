@@ -1,8 +1,4 @@
-/* Reece Sagun - Armada */
-
-/* Code template for different game states was taken from Nathan Altice CMPM120 Lecturer
- * Attributions for open game art are listed as used.
- */
+// TESTING PUSH TO DEV BRANCH
 
 // Instantiating game object
 var game = new Phaser.Game(800, 600, Phaser.AUTO);
