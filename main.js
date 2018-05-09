@@ -36,9 +36,14 @@ Boot.prototype =
 	 */
 	preload:  function()
 	{
+		// Background and Sprites
 		game.load.image('front_door_bg', 'assets/img/temp_art/front-door-temp.png');
 		game.load.image('living_room_bg', 'assets/img/temp_art/inside-temp.png');
 		game.load.atlas("sprite_atlas", 'assets/img/atlas/tempsprite.png', 'assets/img/atlas/tempsprite.json')
+
+		// Audio and SFX
+		game.load.audio('viligante_justice', 'assets/audio/walking_with_poseidon.mp3');
+		game.load.audio('walk_sfx', 'assets/audio/Fantasy Sound Library/Fantasy Sound Library/Mp3/Footsteps/Footstep_Dirt_00.mp3');
 	},
 	create: function()
 	{
@@ -82,6 +87,13 @@ FrontDoor.prototype =
 	},
 	create: function()
 	{
+		// Creating audio
+		// TEMP MUSIC -- CHANGE TO CREEPY EERIE
+		game.music = game.add.audio('viligante_justice');
+		game.music.play('', 0, 0.85, true);
+
+		// Creating sfx
+		//this.walk_sfx = game.add.audio('walk_sfx');
 		var bg_front_door = game.add.sprite(0, 0, 'front_door_bg');
 		bg_front_door.width = game.width;
 		bg_front_door.height = game.height;
@@ -112,6 +124,7 @@ FrontDoor.prototype =
 			player.position.x += 1;
 			player.scale.setTo(0.9, 3);
 			player.animations.play('walk');
+			///this.walk_sfx.play('', 0, 1, true);
 		}
 		else if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
 		{
@@ -120,6 +133,7 @@ FrontDoor.prototype =
 			player.position.x -= 1;
 			player.scale.setTo(-0.9, 3);
 			player.animations.play('walk');
+			//this.walk_sfx.play('', 0, 0.50, false);
 		}
 		else
 		{
