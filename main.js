@@ -2,8 +2,7 @@
 
 // Globals Variables
 // Instantiating game object
-var game = new Phaser.Game(500, 350, Phaser.AUTO);
-
+var game = new Phaser.Game(500, 150, Phaser.AUTO);
 var player, playerSpeed;
 var transparency, semiTransparent;
 var invisDoor, invisDoor2;
@@ -27,7 +26,7 @@ var hint_signs;
 // On Load
 window.onload = function()
 {
-	/* 
+	/*
 	 * Add states to the StateManager
 	 */
 
@@ -47,9 +46,9 @@ window.onload = function()
 
 // Boot state to load assets
 var Boot = function(game){};
-Boot.prototype = 
+Boot.prototype =
 {
-	/*	
+	/*
 	 *	Loading temporary assets.
 	 *	When have final assets, make a sprite atlas.
 	 */
@@ -71,7 +70,6 @@ Boot.prototype =
 		game.load.audio('beep', 'assets/audio/beep.ogg');
 		game.load.audio('locked', 'assets/audio/DoorLockSounds/LockedDoorHandleJiggle.ogg');
 		game.load.audio('opened', 'assets/audio/DoorLockSounds/UnlockDoor.ogg');
-
 		// Scripts
 		game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser-ce/master/filters/Gray.js');
 		//game.load.script('basic', 'https://github.com/photonstorm/phaser-examples/blob/master/examples/filters/basic.js');
@@ -91,7 +89,8 @@ Boot.prototype =
 		game.scale.pageAlignHorizontally = true;
 		game.scale.pageAlignVertically = true;
 		game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-		game.scale.setMinMax(0, 0, 1280, 356);
+
+
 		game.renderer.renderSession.roundPixels = true;	// No Blurring of Pixels
 		game.state.start('MainMenu')
 	}
@@ -99,7 +98,7 @@ Boot.prototype =
 
 // Main Menu state (GUI functionality)
 var MainMenu = function(game){};
-MainMenu.prototype = 
+MainMenu.prototype =
 {
 	preload: function()
 	{
@@ -120,7 +119,7 @@ MainMenu.prototype =
 
 // GamePlay State
 var FrontDoor = function(game){};
-FrontDoor.prototype = 
+FrontDoor.prototype =
 {
 	preload: function()
 	{
@@ -142,7 +141,7 @@ FrontDoor.prototype =
 	            "if (vTextureCoord.x < 0.1) {",
 	                "texColor = vec4(1.0, 0.0, 1.0, 1.0);",
 	            "}",
-	     
+
 	            "gl_FragColor = texColor;",
 
 	        "}"
@@ -173,8 +172,6 @@ FrontDoor.prototype =
 		this.opened = game.add.audio('opened');
 
 		var bg_front_door = game.add.sprite(0, 0, 'front_door_bg');
-		bg_front_door.width = game.width;
-		bg_front_door.height = game.height;
 
 		// Trigger Group
 		trigger = game.add.group();
@@ -183,7 +180,7 @@ FrontDoor.prototype =
 		// Create Active Triggers
 		red_trigger = trigger.create(450, game.world.height-120, 'red_box');
 		this.red_trigger_active = 0;
-		red_trigger.scale.setTo(0.4, 0.9);
+		red_trigger.scale.setTo(1.0, 1.0);
 		red_trigger.alpha = 0.4
 
 		// Door Group -- Can we fix this if theres only one door?
@@ -209,16 +206,16 @@ FrontDoor.prototype =
 
 		// Create clue sequence
 		var clue_symbol = clue.create(300, game.world.height-180, 'green_box');
-		clue_symbol.scale.setTo(0.3, 0.7);
+		clue_symbol.scale.setTo(1.0, 1.0);
 		//clue_symbol.alpha = transparency;
 		clue_symbol = clue.create(335, game.world.height-180, 'brown_box');
-		clue_symbol.scale.setTo(0.3, 0.7);
+		clue_symbol.scale.setTo(1.0, 1.0);
 		//clue_symbol.alpha = transparency;
 		clue_symbol = clue.create(382, game.world.height-180, 'teal_box');
-		clue_symbol.scale.setTo(0.3, 0.7);
+		clue_symbol.scale.setTo(1.0, 1.0);
 		//clue_symbol.alpha = transparency;
 		clue_symbol = clue.create(420, game.world.height-180, 'blue_box');
-		clue_symbol.scale.setTo(0.3, 0.7);
+		clue_symbol.scale.setTo(1.0, 1.0);
 		//clue_symbol.alpha = transparency;
 
 		// Interactive Group
@@ -228,22 +225,22 @@ FrontDoor.prototype =
 
 		// Create Interactive Squares
 		green_switch = interactive.create(100, game.world.height-120, 'green_box');
-		green_switch.scale.setTo(0.4, 0.9);
+		green_switch.scale.setTo(1.0, 1.0);
 		this.green_switch_on = 0;
 		green_switch.alpha = semiTransparent;
 
 		blue_switch = interactive.create(130, game.world.height-120, 'blue_box');
-		blue_switch.scale.setTo(0.4, 0.9);
+		blue_switch.scale.setTo(1.0, 1.0);
 		this.blue_switch_on = 0;
 		blue_switch.alpha = semiTransparent;
 
 		teal_switch = interactive.create(160, game.world.height-120, 'teal_box');
-		teal_switch.scale.setTo(0.4, 0.9);
+		teal_switch.scale.setTo(1.0, 1.0);
 		this.teal_switch_on = 0;
 		teal_switch.alpha = semiTransparent;
 
 		brown_switch = interactive.create(190, game.world.height-120, 'brown_box');
-		brown_switch.scale.setTo(0.4, 0.9);
+		brown_switch.scale.setTo(1.0, 1.0);
 		this.brown_switch_on = 0;
 		brown_switch.alpha = semiTransparent;
 
@@ -259,13 +256,13 @@ FrontDoor.prototype =
 		hint_signs = game.add.group();
 		hint_signs.alpha = transparency;
 		this.hintOne = hint_signs.create(316, game.height-220, 'one');
-		this.hintOne.scale.setTo(0.4, 0.9);
+		this.hintOne.scale.setTo(1.0, 1.0);
 		this.hintTwo = hint_signs.create(400, game.height-220, 'two');
-		this.hintTwo.scale.setTo(0.4, 0.9);
+		this.hintTwo.scale.setTo(1.0, 1.0);
 
 		// Creating Player Instance
-		player = game.add.sprite(70, game.height-108, 'sprite_atlas', 'player-idle');
-		player.scale.setTo(0.9, 3);
+		player = game.add.sprite(70, game.height-35, 'sprite_atlas', 'player-idle');
+		player.scale.setTo(1.0, 1.0);
 		player.anchor.setTo(0.5, 0.5);
 
 		// Player Physics
@@ -361,7 +358,7 @@ FrontDoor.prototype =
 		{
 			red_trigger.alpha = 1.0;
 			this.scream.play('', 1, 0.15, false);
-			this.scream.onStop.add(this.contChangeDim, this)	
+			this.scream.onStop.add(this.contChangeDim, this)
 		}
 		else
 		{
@@ -422,7 +419,7 @@ FrontDoor.prototype =
 			//player.scale.x *= -1;
 			//player.position.x += 10;
 			player.position.x += playerSpeed;
-			player.scale.setTo(0.9, 3);
+			player.scale.setTo(1.0, 1.0);
 			player.animations.play('walk');
 			//timer.loop(2000, this.walkSFX, this);
 			// this.walk_sfx.play('', 0, 1, false);
@@ -432,15 +429,17 @@ FrontDoor.prototype =
 			//player.scale.x *= -1;
 			//player.position.x -= 10;
 			player.position.x -= playerSpeed;
-			player.scale.setTo(-0.9, 3);
+			player.scale.setTo(-1.0, 1.0);
 			player.animations.play('walk');
 			//this.walk_sfx.play('', 0, 0.50, false);
+		}
 		// Maybe change these to ifs so not reliant on movement ifs?
 		else if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR) && this.red_trigger_active == 0)
 		{
 			game.physics.arcade.overlap(player, trigger, this.changeDimension, null, this);
 			game.physics.arcade.overlap(player, door, this.openDoor, null, this);
 			game.physics.arcade.overlap(player, door2, this.openDoor2, null, this);
+
 		}
 		else if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR) && this.red_trigger_active == 1)
 		{
@@ -480,6 +479,7 @@ FrontDoor.prototype =
 			{
 				game.physics.arcade.overlap(player, brown_switch, this.unsetBrownSwitch, null, this);
 			}
+			
 			// Change later to fine tune door codes
 			if(this.green_switch_on == 1 && this.blue_switch_on == 0 && this.teal_switch_on == 0 && this.brown_switch_on == 1)
 			{
