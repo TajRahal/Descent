@@ -137,6 +137,10 @@ MainMenu.prototype =
 	}
 }
 
+// Globals to carry from FD
+var placedBottle = 0;
+var cycle = 0;
+
 // GamePlay State
 var FrontDoor = function(game){};
 FrontDoor.prototype =
@@ -256,6 +260,11 @@ FrontDoor.prototype =
 		// Checks for input of player to determine direction of movement
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
+			if(cycle > 0)
+			{
+				interactable = 1;
+				key = 1;
+			}
 			if(usedApple == 0 && interactable == 1)
 			{
 				game.physics.arcade.overlap(player, apple, this.interactApple, null, this);
@@ -320,6 +329,12 @@ LivingRoom.prototype =
 		game.physics.startSystem(Phaser.Physics.Arcade);
 
 		// SFX
+		this.walk_sfx = game.add.audio('walk_sfx');
+		this.scream = game.add.audio('scream');
+		this.beep = game.add.audio('beep');
+		this.click = game.add.audio('click');
+		this.locked = game.add.audio('locked');
+		this.opened = game.add.audio('opened');
 		this.glass_break = game.add.audio('glass_break')
 		this.meow = game.add.audio('meow');
 
@@ -394,13 +409,28 @@ LivingRoom.prototype =
 	{
 		this.usedPortrait = 1;
 	},
-	interactCabinet: function(player, wineCabinet)
+	completeBottlePuzzle: function()
 	{
-		this.usedCabinet = 1;
+		if(haveBottle == 0 || cycle == 0)
+		{
+			this.click.play('', 0, 1, false);
+		}
+		else
+		{
+			placedBottle = 1;
+			this.beep.play('', 0, 1, false);
+		}
 	},
 	interactDoor: function()
 	{
-		game.state.start("AlternateLivingRoom");
+		if(placedBottle == 0 || cycle == 0)
+		{
+			game.state.start("AlternateLivingRoom");
+		}
+		else if(placedBottle == 1 && cycle == 1)
+		{
+			game.state.start("BedRoom");
+		}
 	},
 	bottlePuzzlePrompt: function()
 	{
@@ -442,26 +472,8 @@ LivingRoom.prototype =
 		}
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR) && this.notInEvent == 1)
 		{
-			if(usedMirror == 0)
-			{
-				game.physics.arcade.overlap(player, mirror, this.interactMirror, null, this);
-			}
-			if(usedPortrait == 0)
-			{
-				game.physics.arcade.overlap(player, portrait, this.interactPortrait, null, this);
-			}
-			if(usedCat == 0)
-			{
-				game.physics.arcade.overlap(player, cat1, this.interactCat, null, this);
-			}
-			if(usedCabinet == 0)
-			{
-				game.physics.arcade.overlap(player, door, this.interactCabinet, null, this);
-			}
-			if(this.doorAccess == 1)
-			{
-				game.physics.arcade.overlap(player, bedDoor, this.interactDoor, null, this);
-			}
+			game.physics.arcade.overlap(player, this.wineCabinet, this.completeBottlePuzzle, null, this);
+			game.physics.arcade.overlap(player, bedDoor, this.interactDoor, null, this);
 		}
 		else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && this.notInEvent == 1)
 		{
@@ -472,12 +484,6 @@ LivingRoom.prototype =
 		else if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT) && this.notInEvent == 1)
 		{
 			player.position.x -= playerSpeed;
-			player.scale.setTo(-1.0, 1);
-			player.animations.play('walk');
-		}
-		else if(game.input.keyboard.isDown(Phaser.Keyboard.UP) && player.body.touching.down && hitGround)
-		{
-			player.body.velocity.y = -100;
 			player.scale.setTo(-1.0, 1);
 			player.animations.play('walk');
 		}
@@ -492,6 +498,9 @@ var AusedMirror = 0;
 var AusedPortrait=0;
 var AusedCat=0;
 var AusedCabinet=0;
+
+// Globals to carry from ALR
+var haveBottle = 0;
 // GamePlay State
 var AlternateLivingRoom = function(game){};
 AlternateLivingRoom.prototype = 
@@ -501,6 +510,14 @@ AlternateLivingRoom.prototype =
 	{
 		// Starting Up Physics and Music
 		game.physics.startSystem(Phaser.Physics.Arcade);
+
+		// Creating sfx
+		this.walk_sfx = game.add.audio('walk_sfx');
+		this.scream = game.add.audio('scream');
+		this.beep = game.add.audio('beep');
+		this.click = game.add.audio('click');
+		this.locked = game.add.audio('locked');
+		this.opened = game.add.audio('opened');
 
 		this.doorAccess = 1;
 		// livingRoomDoor = 0;
@@ -520,9 +537,16 @@ AlternateLivingRoom.prototype =
         wineCabinet.enableBody = true;
         wineCabinet.create(300,47,'wine_cabinet');
 
-        mirror = game.add.group();
-        mirror.enableBody = true;
-        mirror.create(50, 65, 'mirror');
+        this.triggerBottle = game.add.group();
+        this.triggerBottle.enableBody = true;
+        this.bottle = this.triggerBottle.create(380, 95, 'trigger');
+        this.bottle.scale.setTo(0.2, 0.8);
+
+        this.mirrorObj = game.add.group();
+        this.mirrorObj.enableBody = true;
+        this.mirror = this.mirrorObj.create(70, 70, 'mirror');
+        this.mirror.anchor.setTo(0.5, 0.5);
+        this.mirror.angle += 50;
         
         this.normalDoorObj = game.add.group();
         this.normalDoorObj.enableBody = true;
@@ -533,7 +557,9 @@ AlternateLivingRoom.prototype =
 
         this.frontDoorObj = game.add.group();
         this.frontDoorObj.enableBody = true;
-        this.frontDoor = this.frontDoorObj.create(450, 69, 'bed_door');
+        this.frontDoor = this.frontDoorObj.create(490, 100, 'bed_door');
+        this.frontDoor.anchor.setTo(0.5, 0.5);
+        this.frontDoor.angle += 90;
 
         cat1 = game.add.group();
         cat1.enableBody = true;
@@ -578,7 +604,21 @@ AlternateLivingRoom.prototype =
 	},
 	interactFrontDoor: function()
 	{
-		game.state.start("FrontDoor");
+		if(haveBottle == 0)
+		{
+			this.locked.play('', 0, 1, false);
+		}
+		else
+		{
+			cycle += 1;
+			game.state.start("FrontDoor");
+		}
+	},
+	collectBottle: function()
+	{
+		haveBottle = 1;
+		this.bottle.kill();
+		this.beep.play('', 0, 1, false);
 	},
 	update: function()
 	{
@@ -587,24 +627,33 @@ AlternateLivingRoom.prototype =
 		player.body.velocity.x = 0;	// Stills horizontal velocity
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
-			if(usedMirror == 0)
+			if(haveBottle == 0)
+			{
+				game.physics.arcade.overlap(player, this.triggerBottle, this.collectBottle, null, this);
+				game.physics.arcade.overlap(player, this.frontDoorObj, this.interactFrontDoor, null, this);
+			}
+			if(haveBottle == 1)
+			{
+				game.physics.arcade.overlap(player, this.frontDoorObj, this.interactFrontDoor, null, this);		
+			}
+			if(AusedMirror == 0)
 			{
 				game.physics.arcade.overlap(player, mirror, this.interactMirror, null, this);
 			}
-			if(usedPortrait == 0)
+			if(AusedPortrait == 0)
 			{
 				game.physics.arcade.overlap(player, portrait, this.interactPortrait, null, this);
 			}
-			if(usedCat == 0)
+			if(AusedCat == 0)
 			{
 				game.physics.arcade.overlap(player, cat1, this.interactCat, null, this);
 			}
-			if(usedCabinet == 0)
+			if(AusedCabinet == 0)
 			{
 				game.physics.arcade.overlap(player, door, this.interactCabinet, null, this);
 			}
 			game.physics.arcade.overlap(player, this.normalDoorObj, this.interactDoor, null, this);
-			game.physics.arcade.overlap(player, this.frontDoorObj, this.interactFrontDoor, null, this);
+			// game.physics.arcade.overlap(player, this.frontDoorObj, this.interactFrontDoor, null, this);
 		}
 		else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
 		{
