@@ -161,7 +161,7 @@ FrontDoor.prototype =
 		this.opened = game.add.audio('opened');
 
 		// Initalizing Variables
-		playerSpeed = 5;
+		playerSpeed = 2;
 		usedApple = 0;
 		usedPlant = 0;
 		readNewspaper = 0;
@@ -341,11 +341,13 @@ LivingRoom.prototype =
 		this.doorAccess = 1;
 		game.add.sprite(0, 0, 'living_room_bg');
 
+		// Creation of the floor
 		ground = game.add.group();
 		ground.enableBody = true;
         var floor = ground.create(0, 130,'floor');
         floor.body.immovable = true;
 
+        // Creation of Sprites and their interactive groups (Needed for interact)
         portrait = game.add.group();
         portrait.enableBody = true;
         portrait.create(165,25, 'portrait');
@@ -358,6 +360,7 @@ LivingRoom.prototype =
         this.triggerObj.enableBody = true;
         this.trigger = this.triggerObj.create(350, 95, 'trigger');
         this.trigger.scale.setTo(0.2, 0.8);
+        this.trigger.alpha = 0;
 
         mirror = game.add.group();
         mirror.enableBody = true;
@@ -379,10 +382,11 @@ LivingRoom.prototype =
 		this.triggerCatObj.enableBody = true;
 		this.catTrigger = this.triggerCatObj.create(290, 117, 'trigger');
 		this.catTrigger.scale.setTo(0.2,0.5);
+		this.catTrigger.alpha = 0;
 
         game.add.sprite(305, 34, 'cat2');
         
-		// Player Sprite 
+		// Player Creation
 		player = game.add.sprite(40, game.height - 50, 'sprite_atlas', 'player-idle');
 		player.anchor.setTo(0.5, 0.5);
 
@@ -423,23 +427,29 @@ LivingRoom.prototype =
 	},
 	interactDoor: function()
 	{
-		if(placedBottle == 0 || cycle == 0)
+		if(placedBottle == 0 && cycle == 0)
 		{
+			this.opened.play('', 0, 1, false);
 			game.state.start("AlternateLivingRoom");
 		}
-		else if(placedBottle == 1 && cycle == 1)
+		if(placedBottle == 0 && cycle == 1)
 		{
+			this.locked.play('', 0, 1, false);
+		}
+		if(placedBottle == 1 && cycle == 1)
+		{
+			this.opened.play('', 0, 1, false);
 			game.state.start("BedRoom");
 		}
 	},
 	bottlePuzzlePrompt: function()
 	{
-		playerSpeed = 5;
+		playerSpeed = 2;
 		this.notInEvent = 1;
 	},
 	catInteract: function()
 	{
-		playerSpeed = 5;
+		playerSpeed = 2;
 		this.notInEvent = 1;
 	},
 	update: function()
@@ -537,10 +547,13 @@ AlternateLivingRoom.prototype =
         wineCabinet.enableBody = true;
         wineCabinet.create(300,47,'wine_cabinet');
 
-        this.triggerBottle = game.add.group();
-        this.triggerBottle.enableBody = true;
-        this.bottle = this.triggerBottle.create(380, 95, 'trigger');
-        this.bottle.scale.setTo(0.2, 0.8);
+        if(haveBottle == 0)
+        {
+	        this.triggerBottle = game.add.group();
+	        this.triggerBottle.enableBody = true;
+	        this.bottle = this.triggerBottle.create(380, 95, 'trigger');
+	        this.bottle.scale.setTo(0.2, 0.8);
+        }
 
         this.mirrorObj = game.add.group();
         this.mirrorObj.enableBody = true;
@@ -600,6 +613,7 @@ AlternateLivingRoom.prototype =
 	},
 	interactDoor: function()
 	{
+		this.opened.play('', 0, 1, false);
 		game.state.start("LivingRoom");
 	},
 	interactFrontDoor: function()
@@ -610,7 +624,8 @@ AlternateLivingRoom.prototype =
 		}
 		else
 		{
-			cycle += 1;
+			cycle = 1;
+			this.opened.play('', 0, 1, false);
 			game.state.start("FrontDoor");
 		}
 	},
