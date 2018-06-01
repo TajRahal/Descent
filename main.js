@@ -83,7 +83,7 @@ Boot.prototype =
 		// https://opengameart.org/content/meow
 		game.load.audio('meow', 'assets/audio/Meow.ogg');
 		// https://opengameart.org/content/picked-coin-echo-2
-		game.load.audio('pickup', 'assets/audio/Picked Coin Echo 2.mp3');
+		//game.load.audio('pickup', 'assets/audio/Picked Coin Echo 2.mp3');
 
 		// Sprites
 
@@ -93,6 +93,7 @@ Boot.prototype =
 		game.load.audio('beep', 'assets/audio/beep.ogg');
 		game.load.audio('locked', 'assets/audio/DoorLockSounds/LockedDoorHandleJiggle.ogg');
 		game.load.audio('opened', 'assets/audio/DoorLockSounds/UnlockDoor.ogg');
+		game.load.audio('pickup', 'assets/audio/pickup.mp3');
 
 
 		// FRONT PORCH ASSETS
