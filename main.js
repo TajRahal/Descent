@@ -50,6 +50,7 @@ Boot.prototype =
 		game.load.image('backyard_door','assets/img/bedroom/backyard_door.png');
 		game.load.image('bedroom_bed','assets/img/bedroom/bed.png');
 		game.load.image('bedroom_cabinet','assets/img/bedroom/cabinet.png');
+		game.load.image('cabinet_broken','assets/img/bedroom/cabinet_broken.png');
 		game.load.image('closet_door','assets/img/bedroom/closet_door.png');
 		game.load.image('closet','assets/img/bedroom/closet.png');
 		game.load.image('mirror_stand','assets/img/bedroom/mirror_stand.png');
@@ -209,7 +210,7 @@ FrontDoor.prototype =
 		this.pickup = game.add.audio('pickup');
 
 		// Initalizing Variables
-		playerSpeed = 50;
+		playerSpeed = 60;
 		usedApple = 0;
 		usedPlant = 0;
 		readNewspaper = 0;
@@ -378,7 +379,7 @@ function render() {
 //call renderGroup on each of the alive members    
 	// game.debug.body(mirror);
 	// game.debug.body(player);
-	// game.debug.body(portrait)
+	game.debug.body(portrait)
 	// game.debug.body(wineCabinet);
 	// game.debug.body(bedDoor);
 	// game.debug.body(cat1);
@@ -433,7 +434,7 @@ LivingRoom.prototype =
 		this.glass_break = game.add.audio('bottle_break');
 		this.meow = game.add.audio('meow');
 		this.pickup = game.add.audio('pickup');
-		this.skweak = game.add.audio('skweak');
+		//this.skweak = game.add.audio('skweak');
 
 		this.doorAccess = 1;
 		game.add.sprite(0, 0, 'living_room_bg');
@@ -617,13 +618,13 @@ LivingRoom.prototype =
 	},
 	bottlePuzzlePrompt: function()
 	{
-		playerSpeed = 50;
+		playerSpeed = 60;
 		this.notInEvent = 1;
 		disableInput = 0;
 	},
 	catInteract: function()
 	{
-		playerSpeed = 50;
+		playerSpeed = 60;
 		this.notInEvent = 1;
 		disableInput = 0;
 	},
@@ -632,7 +633,7 @@ LivingRoom.prototype =
 		reveal = 1;
 		revealAlternate = 1;
 		this.clueTrigger.kill();
-		this.skweak.play('', 0, 1, false);
+		this.pickup.play('', 0, 1, false);
 		this.mirrorT.angle += 32;
 		this.y.alpha = 1.0;
 	},
@@ -725,7 +726,7 @@ AlternateLivingRoom.prototype =
 	create: function()
 	{
 		// Starting Up Physics and Music
-		game.physics.startSystem(Phaser.Physics.Arcade);
+		//game.physics.startSystem(Phaser.Physics.Arcade);
 		// game.music.resume();
 		if(musicTrack2Paused == 0)
 		{
@@ -825,7 +826,7 @@ AlternateLivingRoom.prototype =
         game.add.sprite(305, 34, 'cat2');
         
 		// Player Sprite 
-		player = game.add.sprite(80, game.height - 50, 'sprite_atlas', 'player-idle');
+		player = game.add.sprite(80, game.height - 46, 'sprite_atlas', 'player-idle');
 		player.anchor.setTo(0.5, 0.5);
 
 		// Player Physics
@@ -971,6 +972,8 @@ BedRoom.prototype =
 	{
 		disableInput = 0;
 		pendant = 0;
+		//game.physics.startSystem(Phaser.Physics.Arcade);
+		//playerSpeed = 60;
 		//BEDROOM CODE----------------------------------------------------------------------------------------------------
 		var bedroomBG = game.add.sprite(0, 0, 'bedroomBG');
 		var floor = game.add.group();
@@ -1129,7 +1132,7 @@ AlternateBedRoom.prototype =
 	create: function()
 	{
 		disableInput = 0;
-		pendant = 0;
+
 		//BEDROOM CODE----------------------------------------------------------------------------------------------------
 		var bedroomBG = game.add.sprite(0, 0, 'bedroomBG');
 		var floor = game.add.group();
@@ -1139,32 +1142,16 @@ AlternateBedRoom.prototype =
 		nDoor.create(game.width-4, game.height-104, 'backyard_door');
 
 		var bedroom_bed = game.add.sprite(game.width/3-50, game.height-81, 'bedroom_bed');
-		bedroom_cabinet = game.add.sprite(game.width/2, 52, 'bedroom_cabinet');
+		cabinet_broken = game.add.sprite(game.width/2, 52, 'cabinet_broken');
 		closet = game.add.sprite(game.width-170,38, 'closet');
 		closet_door = game.add.sprite(game.width-160, 43, 'closet_door');
 		mirror_stand = game.add.sprite(50, 71, 'mirror_stand');
 		small_cabinet = game.add.sprite(100, 99, 'small_cabinet');
-		normal_portrait = game.add.sprite(game.width/3-33, 10, 'normal_portrait');
+		portrait = game.add.sprite(game.width/3-33, 10, 'portrait_missing');
 		door1 = game.add.sprite(2, 99, 'door');
 		door1.anchor.setTo(.5,.5);
 		door1.scale.x *= -1;
-		game.physics.arcade.enable([bedroom_cabinet, closet_door]);
-
-		this.triggerCatObj = game.add.group();
-		this.triggerCatObj.enableBody = true;
-		this.catTrigger = this.triggerCatObj.create(100, 117, 'trigger');
-		this.catTrigger.scale.setTo(0.2, 0.8);
-		this.catTrigger.alpha = 0;
-
-		this.pendantObj = game.add.group();
-		this.pendantObj.enableBody = true;
-		this.pendantPickup = this.pendantObj.create(game.width/2, game.height - 69, 'pendant');
-		this.pendantPickup.alpha = 0.0;
-
-		// bedcat = game.add.sprite(0, 0, 'cat_atlas', 'cat-run-1');
-		// cat_run = bedcat.animations.add(Phaser.Animation.generateFrameNames('cat-run-', 1, 10));
-		//bedcat.animations.killOnComplete = true;
-		//bedcat.animations.play('cat-run');
+		game.physics.arcade.enable([closet_door, portrait]);
 
 		// Player Sprite 
 		player = game.add.sprite(40, game.height - 47, 'sprite_atlas', 'player-idle');
@@ -1203,20 +1190,11 @@ AlternateBedRoom.prototype =
 		disableInput = 0;
 	},
 
-	interactCabinet: function(player, pendant)
+	interactPortrait: function(player, pendant)
 	{
-		//this.pickup.play('', 0, 1, false);
 		
-		this.pendantPickup.alpha = 1.0;
 	},
 
-	pickupPendant: function()
-	{
-		//this.pickup.play('', 0, 1, false);
-		pendant = 1;
-		this.pendantPickup.kill();
-		console.log(pendant);
-	},
 
 	interactCloset: function(player, closet_door)
 	{
@@ -1235,22 +1213,12 @@ AlternateBedRoom.prototype =
 	{
 		//render();
 		this.fire.update();
-		// var passCat = game.physics.arcade.collide(player, this.triggerCatObj);
-		// if(passCat && disableInput == 0) 
-		// {
-		// 	this.catTrigger.kill();
-		// 	disableInput = 1;
-		// 	cat_run.play(10, false, true);
-		// }
-		// if(cat_run.isFinished == true)
-		// {
-		// 	disableInput = 0;
-		// }
+
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
-			game.physics.arcade.overlap(player, bedroom_cabinet, this.interactCabinet, null, this);
+			game.physics.arcade.overlap(player, portrait, this.interactPortrait, null, this);
 			game.physics.arcade.overlap(player, nDoor, this.interactDoor2, null, this);
-			game.physics.arcade.overlap(player, this.pendantObj, this.pickupPendant, null, this);
+			//game.physics.arcade.overlap(player, portrait, this., null, this);
 			game.physics.arcade.overlap(player, closet_door, this.interactCloset, null, this);
 			//game.physics.arcade.overlap(player, bedroom_cabinet, this.interact, null, this);
 		}
