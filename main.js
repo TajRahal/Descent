@@ -4,7 +4,7 @@
 // Instantiating game object
 var game = new Phaser.Game(576, 160, Phaser.AUTO);
 var player;
-var playerSpeed = 600;
+var playerSpeed = 60;
 var ground, apple, plant, door, newspaper;
 var usedPlant, usedApple, key, readNewspaper, interactable;
 var bottlePutBack = 1;
@@ -190,16 +190,10 @@ MainMenu.prototype =
 	{
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
-			game.state.start('LivingRoom');
+			game.state.start('FrontDoor');
 		}
 	}
 }
-
-
-
-
-
-
 
 
 
@@ -356,7 +350,7 @@ FrontDoor.prototype =
 	},
 	update: function()
 	{
-		render();
+		//render();
 		// Collision detection between groups
 		var hitGround = game.physics.arcade.collide(player, ground);	// Collision b/t player and platforms
 		// player.body.gravity.y = 350;	// Simulate gravity by applying a force in the y-axis
@@ -410,7 +404,7 @@ FrontDoor.prototype =
 		// {
 		// 	player.body.velocity.y = -100;
 		// 	player.scale.setTo(-1.0, 1);
-		// 	player.animations.play('walk');
+		// 	player.animations.play('walk'); 
 		// }
 		else
 		{
@@ -1397,7 +1391,7 @@ Backyard.prototype =
 		},
 
         update: function () {
-			render();
+			//render();
         	var hitGround = game.physics.arcade.collide(player, ground);
         	if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 			{
