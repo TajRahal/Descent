@@ -3,7 +3,7 @@
 // Globals Variables
 // Instantiating game object
 var game = new Phaser.Game(576, 160, Phaser.AUTO);
-var player;
+var player, transition;
 var playerSpeed = 60;
 var ground, apple, plant, door, newspaper;
 var usedPlant, usedApple, key, readNewspaper, interactable;
@@ -74,11 +74,14 @@ Boot.prototype =
 		game.load.image('normal_portrait','assets/img/bedroom/normal_picture.png');
 		game.load.image('door','assets/img/bedroom/front_door.png');
 		game.load.image('pendant', 'assets/img/bedroom/necklase.png');
+		game.load.image('candle_lit', 'assets/img/bedroom/candle_lit.png');
+		game.load.image('candle_out', 'assets/img/bedroom/candle_out.png');
 
 
 		// Title image
 		game.load.image('title', 'assets/img/Descent_Title.png');
 		game.load.image('space', 'assets/img/press_space.png');
+		game.load.atlas('transition_atlas', 'assets/img/atlas/transition.png', 'assets/img/atlas/transition.json');
 
 		// LIVINGROOM ASSETS
 		// Background and Sprites
@@ -190,7 +193,7 @@ MainMenu.prototype =
 	{
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
-			game.state.start('FrontDoor');
+			game.state.start('BedRoom');
 		}
 	}
 }
@@ -307,22 +310,26 @@ FrontDoor.prototype =
 		this.keyPickup.alpha = 0.0;
 
 		var emitter = game.add.emitter(400, -100, 800);
-            emitter.width = game.world.width;
-            //emitter.angle = 20; // uncomment to set an angle for the rain.
+        emitter.width = game.world.width;
+        //emitter.angle = 20; // uncomment to set an angle for the rain.
 
 
-            emitter.makeParticles('rain');
-            emitter.minParticleScale = .5;
-            emitter.maxParticleScale = 1.5;
+        emitter.makeParticles('rain');
+        emitter.minParticleScale = .5;
+        emitter.maxParticleScale = 1.5;
 
-            emitter.setYSpeed(500, 500);
-            emitter.setXSpeed(-500, -500);
+        emitter.setYSpeed(500, 500);
+        emitter.setXSpeed(-500, -500);
 
-            emitter.minRotation = 0;
-            emitter.maxRotation = 0;
+        emitter.minRotation = 0;
+        emitter.maxRotation = 0;
 
-            emitter.start(false, 700, 5, 0);
+        emitter.start(false, 700, 5, 0);
 
+        // Transition Test
+  //       transition = game.add.sprite(0, 0, 'transition_atlas', 'transition1');
+		// transition.animations.add('close', Phaser.Animation.generateFrameNames('transition', 1, 9), 4, false);
+		// transition.animations.play('close');
 
 	},
 	switchLivingRoom: function()
@@ -863,146 +870,203 @@ AlternateLivingRoom.prototype =
 
 
 
-
-firstTimeBedroom = 0;
-usedCloset = 0;
+// Initalilzing globals needed for this level
+var firstTimeBedroom = 0;
+var usedCloset = 0;
+var havePendant = 0;
 
 var BedRoom = function(game){};
 BedRoom.prototype =
 {
-	preload: function()
-	{
-
-	},
 	create: function()
 	{
-		disableInput = 0;
-		pendant = 0;
-		game.physics.startSystem(Phaser.Physics.Arcade);
+		// Initializing variables
 		playerSpeed = 60;
-		//this.usedCloset = 0;
-		usedDresser = 0;
-		usednDoor = 0;
+		this.disableInput = 0;
+		this.pendantSpawn = 0;
+		this.passedDresser = 0;
+		game.physics.startSystem(Phaser.Physics.Arcade);
 
-		//BEDROOM CODE----------------------------------------------------------------------------------------------------
-		var bedroomBG = game.add.sprite(0, 0, 'bedroomBG');
-		var floor = game.add.group();
-		var bedroomFloor = floor.create(0, game.height-31, 'bedroomFloor');
-		nDoor = game.add.group();
-		nDoor.enableBody = true;
-		nDoor.create(game.width-4, game.height-104, 'backyard_door');
+		// Creating instances of Audio
+		this.walk_sfx = game.add.audio('walk_sfx');
+		this.scream = game.add.audio('scream');
+		this.beep = game.add.audio('beep');
+		this.click = game.add.audio('click');
+		this.locked = game.add.audio('locked');
+		this.opened = game.add.audio('opened');
+		this.glass_break = game.add.audio('bottle_break');
+		this.meow = game.add.audio('meow');
+		this.pickup = game.add.audio('pickup');
+		this.skweak = game.add.audio('skweak');
+		
+		// Creating Sprites 
+		game.add.sprite(0,0, 'bedroomBG');		// Anything the player can stand on
+		ground = game.add.group();
+		this.floor = ground.create(0, game.height - 31, 'bedroomFloor');
 
-		var bedroom_bed = game.add.sprite(game.width/3-50, game.height-81, 'bedroom_bed');
-		bedroom_cabinet = game.add.sprite(game.width/2, 52, 'bedroom_cabinet');
-		closet = game.add.sprite(game.width-170,38, 'closet');
+		this.backyardDoor = game.add.sprite(game.width - 4, game.height - 104,'backyard_door');
+		this.bed = game.add.sprite(game.width/3-50, game.height - 81, 'bedroom_bed');
+		this.cabinet = game.add.sprite(game.width/2, 52, 'bedroom_cabinet');
+		this.closet = game.add.sprite(game.width - 170, 38, 'closet');
 		if(usedCloset == 1)
 		{
-			closet_door = game.add.sprite(game.width-127, 43, 'closet_door');
+			this.closetDoor = game.add.sprite(game.width - 127, 43, 'closet_door');
 		}
 		else
 		{
-			closet_door = game.add.sprite(game.width-160, 43, 'closet_door');
+			this.closetDoor = game.add.sprite(game.width-160, 43, 'closet_door');
 		}
-		mirror_stand = game.add.sprite(55, 71, 'mirror_stand');
-		small_cabinet = game.add.sprite(100, 99, 'small_cabinet');
-		normal_portrait = game.add.sprite(game.width/3-33, 10, 'normal_portrait');
-		door1 = game.add.sprite(2, 99, 'door');
-		door1.anchor.setTo(.5,.5);
-		door1.scale.x *= -1;
-		game.physics.arcade.enable([bedroom_cabinet, closet_door]);
+
+		this.mirrorStand = game.add.sprite(55, 71, 'mirror_stand');
+		this.smallCabinet = game.add.sprite(100, 99, 'small_cabinet');
+		this.candle = game.add.sprite(115, 87, 'candle_lit');
+		this.normalPortrait = game.add.sprite(game.width/3 - 33, 10, 'normal_portrait');
+		this.door = game.add.sprite(2, 99, 'door');
+		this.door.anchor.setTo(0.5, 0.5);
+		this.door.scale.x *= -1;
 
 		if(firstTimeBedroom == 0)
 		{
-			this.triggerCatObj = game.add.group();
-			this.triggerCatObj.enableBody = true;
-			this.catTrigger = this.triggerCatObj.create(100, 117, 'trigger');
+			this.catTrigger = game.add.sprite(180, 117, 'trigger');
 			this.catTrigger.scale.setTo(0.2, 0.8);
-			this.catTrigger.alpha = 0;
-			bedcat = game.add.sprite(0, 0, 'cat_atlas', 'cat-run-1');
-			cat_run = bedcat.animations.add(Phaser.Animation.generateFrameNames('cat-run-', 1, 10));
+			this.catTrigger.alpha = 1.0;
+			this.bedCat = game.add.sprite(0, 0, 'cat_atlas', 'cat-run-1');
+			cat_run = this.bedCat.animations.add(Phaser.Animation.generateFrameNames('cat-run-', 1, 10));
 		}
 
-		// this.pendantObj = game.add.group();
-		// this.pendantObj.enableBody = true;
-		// this.pendantPickup = this.pendantObj.create(game.width/2, game.height - 69, 'pendant');
-		// this.pendantPickup.alpha = 0.0;
-		//bedcat.animations.killOnComplete = true;
-		//bedcat.animations.play('cat-run');
+		this.catDresser = game.add.sprite(353, 80, 'cat2');
+		this.catDTrigger = game.add.sprite(335, 105, 'trigger');
+		this.catDTrigger.scale.setTo(0.2, 0.8);
+		this.catDTrigger.alpha = 1.0;
+
+		this.pendant = game.add.sprite(game.width/2, game.height - 69, 'pendant');
+		this.pendant.alpha = 0.0;
 
 		// Player Sprite
 		player = game.add.sprite(30, game.height - 47, 'sprite_atlas', 'player-idle');
 		player.anchor.setTo(0.5, 0.5);
 
 		// Player Physics
-		game.physics.arcade.enable(player);
-		player.body.setSize(10, 30, 3, 0);
-		// player.body.bounce.y = 0.1;
-		// player.body.gravity.y = 1200;
+		game.physics.arcade.enable(player);		// Player Physics
+		player.smoothed = true;
+		player.body.setSize(10, 32, 4, 1);
+		player.body.gravity.y = 0;				// To Fly to ceiling apply y velocity until collides with top
 		player.body.collideWorldBounds = true;
 
-		// Player Animations
-		player.animations.add('idle', ['player-idle'], 0, false);
+		player.animations.add('idle', ['player-idle'], 0, false);		// Player Animations
 		player.animations.add('walk', Phaser.Animation.generateFrameNames('player-walk-0', 1, 6), 10, true);
 		player.animations.play('idle');
+
+		game.physics.arcade.enable([this.cabinet, this.closetDoor, this.catTrigger, this.catDTrigger, this.pendant, this.backyardDoor]);
 
 	},
 
 	interactDoor2: function()
 	{
+		this.opened.play('', 0, 1, false);
+		this.opened.onStop.add(this.switchState, this);
+	},
+	switchState: function()
+	{
 		game.state.start("AlternateBedRoom");
 	},
-
 	enableInput: function()
 	{
 		disableInput = 0;
 	},
-	interactCloset: function(player, closet_door)
+	closetDelay: function()
 	{
-		closet_door.position.x += 33;
+		this.disableInput = 0;
 		usedCloset = 1;
 	},
+	interactCloset: function(player, closet_door)
+	{
+		this.disableInput = 1;
+		this.closetDoor.position.x += 33;
+		this.skweak.play('', 0, 1, false);
+		this.skweak.onStop.add(this.closetDelay, this);
+	},
+	playCatAnimation: function()
+	{
+		firstTimeBedroom = 1;
+		cat_run.play(10, false, true);
 
+	},
+	meowIndicate: function()
+	{
+		this.meow.play('', 0, 1, false);
+		this.disableInput = 0;
+	},
+	collectPendant: function()
+	{
+		havePendant = 1;
+		this.disableInput = 1;
+		this.pendant.kill();
+		this.pickup.play('', 0, 1, false);
+		this.pickup.onStop.add(this.meowIndicate, this);
+	},
+	spawnPendant: function()
+	{
+		this.pendant.alpha = 1.0;
+		this.pendantSpawn = 1;
+	},
 	update: function()
 	{
-		//render();
-		var passCat = game.physics.arcade.collide(player, this.triggerCatObj);
-		if(passCat && disableInput == 0 && firstTimeBedroom == 0)
+		// Collision Trigger Events
+		render();
+		var passCat = game.physics.arcade.collide(player, this.catTrigger);
+		var passDresser = game.physics.arcade.collide(player, this.catDTrigger);
+
+		if(passCat && this.disableInput == 0 && firstTimeBedroom == 0)
 		{
 			this.catTrigger.kill();
-			disableInput = 1;
-			firstTimeBedroom = 1;
-			cat_run.play(10, false, true);
+			this.disableInput = 1;
+			this.meow.play('', 0, 1, false);
+			this.meow.onStop.add(this.playCatAnimation, this);
+		}
+		if(passDresser && this.passedDresser == 0)
+		{
+			this.catDTrigger.kill();
+			this.disableInput = 1;
+			this.meow.play('', 0, 1, false);
+			this.meow.onStop.add(this.spawnPendant, this);
 		}
 		if(cat_run.isFinished == true)
 		{
-			disableInput = 0;
+			this.disableInput = 0;
+		}
+
+		// Checking Overlap to Pick up Objectives
+		if(this.pendant.alpha == 1.0)
+		{
+			game.physics.arcade.overlap(player, this.pendant, this.collectPendant, null, this);
 		}
 		if(usedCloset == 0)
 		{
-			game.physics.arcade.overlap(player, closet_door, this.interactCloset, null, this);
+			game.physics.arcade.overlap(player, this.closetDoor, this.interactCloset, null, this);
 		}
 
-
+		// Opening the Door
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) {
-            game.physics.arcade.overlap(player, nDoor, this.interactDoor2, null, this);
+            game.physics.arcade.overlap(player, this.backyardDoor, this.interactDoor2, null, this);
         }
 
-		//game.physics.arcade.overlap(player, nDoor, this.interactDoor2, null, this);
-		if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && disableInput == 0)
+        // Movement Controls
+		if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && this.disableInput == 0)
 		{
-			player.position.x += playerSpeed;
+			player.body.velocity.x = playerSpeed;
 			player.scale.setTo(1.0, 1);
 			player.animations.play('walk');
 		}
-		else if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT) && disableInput == 0)
+		else if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT) && this.disableInput == 0)
 		{
-			player.position.x -= playerSpeed;
+			player.body.velocity.x = -playerSpeed;
 			player.scale.setTo(-1.0, 1);
 			player.animations.play('walk');
 		}
 		else
 		{
-			// player.body.velocity.x = 0;
+			player.body.velocity.x = 0;
 			player.animations.play('idle')
 		}
 	}
@@ -1027,7 +1091,6 @@ AlternateBedRoom.prototype =
 	create: function()
 	{
 		disableInput = 0;
-		playerSpeed = 4;
 
 		//BEDROOM CODE----------------------------------------------------------------------------------------------------
 		var bedroomBG = game.add.sprite(0, 0, 'bedroomBG');
@@ -1047,6 +1110,7 @@ AlternateBedRoom.prototype =
 		closet = game.add.sprite(game.width-170,38, 'closet');
 		closet_door = game.add.sprite(game.width-127, 43, 'closet_door');
 		mirror_stand = game.add.sprite(55, 71, 'mirror_stand');
+		cabinet_broken = game.add.sprite(game.width/2, 52, 'cabinet_broken');
 		mirror_stand_broken = game.add.sprite(55, 71, 'mirror_stand_broken');
 		if (passMirror == 0)
 		{
