@@ -123,6 +123,7 @@ Boot.prototype =
 		game.load.audio('rain', 'assets/audio/Dark_Rainy_Night.ogg');
 		game.load.audio('muff_rain', 'assets/audio/Dark_Rainy_Night_Muffled.ogg');
 		game.load.audio('glass_shatter', 'assets/audio/glass_break.ogg');
+		game.load.audio('couch_scrape', 'assets/audio/couch_scrape.ogg');
 
 
 		// FRONT PORCH ASSETS
@@ -201,7 +202,7 @@ MainMenu.prototype =
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
 			musicTrack1.stop();
-			game.state.start('FrontDoor');
+			game.state.start('BedRoom');
 		}
 	}
 }
@@ -714,6 +715,7 @@ AlternateLivingRoom.prototype =
 	{
 		// Variable Initalization
 		this.disableInput = 0;
+		this.couchS = 0;
 
 		// Starting Up Physics and Music
 		musicTrack3 = game.add.audio('heart_beat');
@@ -734,6 +736,7 @@ AlternateLivingRoom.prototype =
 		this.meow = game.add.audio('meow');
 		this.pickup = game.add.audio('pickup');
 		this.skweak = game.add.audio('skweak');
+		this.couchScrape = game.add.audio('couch_scrape');
 
 		// Creating Sprites 
 		game.add.sprite(0, 0, 'living_room_bg');	// Background for the room
@@ -851,7 +854,27 @@ AlternateLivingRoom.prototype =
 
 		if(haveBottle == 1 && player.position.x > 50 && player.position.x < 250)
 		{
+			if(this.couchS == 0)
+			{
+				this.couchScrape.play('', 0, 1, true);
+				this.couchS = 1;
+			}
+			else if(player.body.velocity.x != 0 && this.couchS == 1)
+			{
+				this.couchScrape.resume();
+			}
+			if(player.body.velocity.x == 0 && this.couchS == 1)
+			{
+				this.couchScrape.pause();
+			}
 			this.Acouch.position.x = player.position.x;
+		}
+		else if(player.position.x < 50 || player.position.x > 250)
+		{
+			if(this.couchS == 1)
+			{
+				this.couchScrape.pause();
+			}
 		}
 
 		// Navigation through doors
@@ -974,7 +997,7 @@ BedRoom.prototype =
 		// Player Physics
 		game.physics.arcade.enable(player);		// Player Physics
 		player.smoothed = true;
-		player.body.setSize(12, 30, 4, 2);
+		player.body.setSize(12, 32, 4, 1);
 		player.body.gravity.y = 0;				// To Fly to ceiling apply y velocity until collides with top
 		player.body.collideWorldBounds = true;
 
@@ -1030,7 +1053,7 @@ BedRoom.prototype =
 	update: function()
 	{
 		// Collision Trigger Events
-		// render();
+		render();
 		var passCat = game.physics.arcade.collide(player, this.catTrigger);
 
 		if(passCat && firstTimeBedroom == 0)
@@ -1302,13 +1325,13 @@ AlternateBedRoom.prototype =
         	player.body.gravity.y = -20;
         	// player.position.y = 0;
         }
-		if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && disableInput == 0)
+		if(game.input.keyboard.isDown(Phaser.Keyboard.Y) && disableInput == 0)
 		{
 			player.body.velocity.x = playerSpeed;
 			player.scale.x = 1.0;		// MAKE TYHIS 11 LOL
 			player.animations.play('walk');
 		}
-		else if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT) && disableInput == 0)
+		else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && disableInput == 0)
 		{
 			player.body.velocity.x = -playerSpeed;
 			player.scale.x = -1.0;
