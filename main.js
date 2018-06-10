@@ -1,8 +1,9 @@
-// Features_RS Copy of Main
+// Features_MR Copy of Main
 
-// Globals Variables
 // Instantiating game object
 var game = new Phaser.Game(576, 160, Phaser.AUTO);
+
+// Globals Variables
 var player, transition;
 var playerSpeed = 60;
 var ground, apple, plant, door, newspaper;
@@ -11,25 +12,29 @@ var bottlePutBack = 1;
 var livingRoomDoor, nDoor;
 var disableInput = 0;
 var timer;
-var altCouch, move = 0;
-
+var altCouch;
+var fromAlternateLR = 0;
 var musicTrack1, musicTrack2;
 var musicTrack2Paused = 0;
 var musicTrack3Paused = 0;
-
-// Tracking From Where
-var fromFrontDoor;
-var fromLivingRoom;
-var fromAlternateLR = 0;
+var placedBottle = 0;
+var cycle = 0;
+var bottleBroke = 0;
+var mirrorTurned = 0;
+var ghostLook = 0.5;
+var haveBottle = 0;
+var firstTimeBedroom = 0;
+var usedCloset = 0;
+var havePendant = 0;
+var passMirror = 0;
+var passDresser = 0;
+var flipSide = 0;
+var placedPendant = 0;
+var haveKey = 0;
 
 // On Load
 window.onload = function()
 {
-	/*
-	 * Add states to the StateManager
-	 */
-
-	// Asset Loading and Menus (Maybe include in-game pause)
 	game.state.add('Boot', Boot);
 	game.state.start('Boot');
 }
@@ -38,88 +43,22 @@ window.onload = function()
 var Boot = function(game){};
 Boot.prototype =
 {
-	/*
-	 *	Loading temporary assets.
-	 *	When have final assets, make a sprite atlas.
-	 */
 	preload:  function()
 	{
 		// SCRIPTS
 		game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser-ce/master/filters/Gray.js');
 		game.load.script('filter', 'https://cdn.rawgit.com/photonstorm/phaser-ce/master/filters/Fire.js');
 
+		//Loading Atlas of All Sprites and Menu Images
 		game.load.atlas('megaAtlas', 'assets/img/megaAtlas.png', 'assets/img/megaAtlas.json')
+		game.load.image('pause', 'assets/img/pause.png');
 
-		//BACKYARD ASSETS-----------------------------------------
-
-		// game.load.image('tree', 'assets/img/backyard/tree.png');
-		// game.load.image('apple', 'assets/img/backyard/apple.png');
-		// game.load.image('backyard_BG', 'assets/img/backyard/backyard_bg.png');
-		// game.load.image('backyard_cement_ground', 'assets/img/backyard/backyard_cement_ground.png');
-		// game.load.image('backyard_door', 'assets/img/backyard/backyard_door.png');
-		// game.load.image('backyard_ground', 'assets/img/backyard/backyard_ground.png');
+		//Loading Rain Spritesheet for Emitter System
 		game.load.spritesheet('rain', 'assets/img/rain.png');
 		game.load.spritesheet('rain_splash', 'assets/img/rain_splash.png');
 
-
-		// BEDROOM ASSETS------------------------------------------
-		// game.load.image('bedroomBG','assets/img/bedroom/bedroom bg.png');
-		// game.load.image('bedroomFloor','assets/img/bedroom/bedroom_floor.png');
-		// game.load.image('backyard_door','assets/img/bedroom/backyard_door.png');
-		// game.load.image('bedroom_bed','assets/img/bedroom/bed.png');
-		// game.load.image('bedroom_cabinet','assets/img/bedroom/cabinet.png');
-		// game.load.image('cabinet_broken','assets/img/bedroom/cabinet_broken.png');
-		// game.load.image('closet_door','assets/img/bedroom/closet_door.png');
-		// game.load.image('closet','assets/img/bedroom/closet.png');
-		// game.load.image('mirror_stand','assets/img/bedroom/mirror_stand.png');
-		// game.load.image('mirror_stand_broken', 'assets/img/bedroom/mirror_stand_broken.png');
-		// game.load.image('small_cabinet','assets/img/bedroom/small_cabinet.png');
-		// game.load.image('normal_portrait','assets/img/bedroom/normal_picture.png');
-		// game.load.image('door','assets/img/bedroom/front_door.png');
-		// game.load.image('pendant', 'assets/img/bedroom/necklase.png');
-		// game.load.image('candle_lit', 'assets/img/bedroom/candle_lit.png');
-		// game.load.image('candle_out', 'assets/img/bedroom/candle_out.png');
-		// game.load.image('wall', 'assets/img/bedroom/wall_structure.png');
-		// game.load.image('portrait_mp', 'assets/img/bedroom/portrait_missing_pendant.png');
-		// game.load.image('closet_~', 'assets/img/bedroom/closet__.png');
-
-		// Title image
-		// game.load.image('title', 'assets/img/Descent_Title.png');
-		// game.load.image('space', 'assets/img/press_space.png');
-		//game.load.atlas('transition_atlas', 'assets/img/atlas/transition.png', 'assets/img/atlas/transition.json');
-
-		// LIVINGROOM ASSETS
-		// Background and Sprites
-     //    game.load.image('front_door', 'assets/img/livingroom/front_door.png');
-     //    game.load.image('living_room_bg', 'assets/img/livingroom/living_bg.png');
-     //    game.load.image('floor', 'assets/img/livingroom/floor.png');
-     //    game.load.image('mirror', 'assets/img/livingroom/livingroom_mirror.png');
-     //    game.load.image('wine_cabinet', 'assets/img/livingroom/wine_cabinet.png');
-     //    game.load.image('bed_door', 'assets/img/livingroom/front_view_door.png');
-     //    game.load.image('cat1', 'assets/img/livingroom/cat.png');
-     //    game.load.image('portrait', 'assets/img/livingroom/normal_picture.png');
-     //    game.load.image('cat2', 'assets/img/livingroom/laying_cat.png');
-     //    game.load.image('cabinet_missing', 'assets/img/livingroom/cabinet_missing.png');
-     //    game.load.image('portrait_missing', 'assets/img/livingroom/portrait_missing.png');
-     //    game.load.image('cracked_bottle', 'assets/img/livingroom/bottle_cracked.png');
-     //    game.load.image('podium', 'assets/img/livingroom/podium.png');
-	    // game.load.image('y-hint', 'assets/img/livingroom/y1.png');
-	    // game.load.image('couch', 'assets/img/livingroom/couch.png');
-
-
-		// Temporary Assets (If use later then add to atlas)
-		// game.load.image('trigger', 'assets/img/greenbox.png');
-		// https://opengameart.org/content/meow
-		game.load.audio('meow', 'assets/audio/Meow.ogg');
-		// https://opengameart.org/content/picked-coin-echo-2
-		game.load.audio('pickup', 'assets/audio/Picked Coin Echo 2.mp3');
-
-		// Sprites
-
-		// SFX
-		//game.load.audio('scream', 'assets/audio/scream_horror1.mp3');
+		/*Audio and SFX*/
 		game.load.audio('click', 'assets/audio/UI_SFX_Set/click1.mp3');
-		//game.load.audio('beep', 'assets/audio/beep.ogg');
 		game.load.audio('locked', 'assets/audio/DoorLockSounds/LockedDoorHandleJiggle.ogg');
 		game.load.audio('opened', 'assets/audio/DoorLockSounds/UnlockDoor.ogg');
 		game.load.audio('heart_beat', 'assets/audio/heartbeat.ogg');
@@ -127,31 +66,16 @@ Boot.prototype =
 		game.load.audio('muff_rain', 'assets/audio/Dark_Rainy_Night_Muffled.ogg');
 		game.load.audio('glass_shatter', 'assets/audio/glass_break.ogg');
 		game.load.audio('couch_scrape', 'assets/audio/couch_scrape.ogg');
-
-
-		// FRONT PORCH ASSETS
-		// game.load.image('front_porch_bg', 'assets/img/front_porch/outside_front.png');
-		// game.load.image('front_ground', 'assets/img/front_porch/outside_front_ground.png');
-		// game.load.image('front_door', 'assets/img/front_porch/front_door.png');
-		// game.load.image('porch_platform', 'assets/img/front_porch/porch_platform.png');
-		// game.load.image('porch_steps', 'assets/img/front_porch/porch_steps.png');
-		// game.load.image('apple', 'assets/img/front_porch/apple.png');
-		// game.load.image('plant', 'assets/img/front_porch/plant.png');
-		// game.load.image('newspaper', 'assets/img/front_porch/newspaper.png');
-		// game.load.image('porch_step2', 'assets/img/front_porch/porch_step2.png')
-		// game.load.atlas("sprite_atlas", 'assets/img/atlas/tempsprite.png', 'assets/img/atlas/tempsprite.json');
-		// game.load.atlas('cat_atlas', 'assets/img/bedroom/catRun.png', 'assets/img/bedroom/catRun.json');
-		// game.load.image('key', 'assets/img/front_porch/key.png');
-
-		// Audio and SFX
 		// https://opengameart.org/content/collaboration-theme-song-shades
 		game.load.audio('shades', 'assets/audio/Shades/Shades.mp3');
+		// https://opengameart.org/content/meow
+		game.load.audio('meow', 'assets/audio/Meow.ogg');
+		// https://opengameart.org/content/picked-coin-echo-2
+		game.load.audio('pickup', 'assets/audio/Picked Coin Echo 2.mp3');
 		// https://opengameart.org/content/scary-ambient-wind
 		game.load.audio('scary_wind', 'assets/audio/Scary Ambient Wind.ogg');
-		game.load.audio('walk_sfx', 'assets/audio/Fantasy Sound Library/Fantasy Sound Library/Mp3/Footsteps/Footstep_Dirt_00.mp3')
 		// https://opengameart.org/content/skweaks
 		game.load.audio('skweak', 'assets/audio/skweak1.ogg');
-
 		// https://opengameart.org/content/glass-break
 		game.load.audio('glass_break', 'assets/audio/glass_breaking.mp3');
 		// https://opengameart.org/content/breaking-bottle
@@ -184,7 +108,6 @@ MainMenu.prototype =
 	{
 		musicTrack1 = game.add.audio('shades');
 		game.sound.setDecodedCallback([ musicTrack1 ], this.startMusic, this);
-		// musicTrack1.play('', 0, 1.0, true);
 
 		var titleImage = game.add.image(game.width/2, 50, 'megaAtlas', 'Descent_Title');
         titleImage.anchor.setTo(0.5, 1);
@@ -205,34 +128,136 @@ MainMenu.prototype =
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
 			musicTrack1.stop();
-			game.state.start('AlternateBedRoom');
+			game.state.start('FrontDoor');
 		}
 	}
 }
 
 
+/*-----------------------UI-----------------------*/
+window.onkeydown = function(event) {
+	// capture keycode (event.which for Firefox compatibility)
+	var keycode = event.keyCode || event.which;
+	var pauseKey = event.keyCode || event.which;
+	if(keycode === Phaser.Keyboard.ESC) 
+	{
+		pauseGame();
+	}
+	if (pauseKey === Phaser.Keyboard.Q && game.paused)
+	{
+		game.paused = false;
+		quitGame();
+	}
+	if (pauseKey === Phaser.Keyboard.R && game.paused)
+	{
+		game.paused = false;
+		resetLevel();
+	}
+}
+
+function pauseGame() 
+{
+	// toggle game pause
+	game.paused ? game.paused = false : game.paused = true;
+
+	game.paused ? pause_menu = game.add.sprite(576/2, 160/2, 'pause')  : pause_menu.destroy() ;
+
+	if(game.paused){
+		pause_menu.anchor.setTo(0.5, 0.5);
+	
+	}
+}
+
+function quitGame() 
+{
+	//Stop all audio (except meowing apparently)
+	game.sound.stopAll();
+
+	//Reset all Global Variables
+	bottlePutBack = 1;
+	disableInput = 0;
+	musicTrack2Paused = 0;
+	musicTrack3Paused = 0;
+	fromAlternateLR = 0;
+	placedBottle = 0;
+	cycle = 0;
+	bottleBroke = 0;
+	mirrorTurned = 0;
+	ghostLook = 0.5;
+	haveBottle = 0;
+	firstTimeBedroom = 0;
+	usedCloset = 0;
+	havePendant = 0;
+	passMirror = 0;
+	passDresser = 0;
+	flipSide = 0;
+	placedPendant = 0;
+	haveKey = 0;
+
+	//Return to Main Menu
+	game.state.start('MainMenu');
+}
+
+function resetLevel() 
+{
+	//Stop All Audio (except meowing apparently)
+	game.sound.stopAll();
+
+	//Determine Where/What to Restart
+	if(game.state.current == 'FrontDoor')
+	{
+		placedBottle = 0;
+		cycle = 0;
+		game.state.restart('FrontDoor');
+	}
+	else if(game.state.current == 'LivingRoom')
+	{
+		bottleBroke = 0;
+		mirrorTurned = 0;
+		fromAlternateLR = 0;
+		game.state.restart('LivingRoom');
+	}
+	else if(game.state.current == 'AlternateLivingRoom')
+	{
+		bottleBroke = 0;
+		mirrorTurned = 0;
+		ghostLook = 0.5;
+		haveBottle = 0;
+		fromAlternateLR = 0;
+		game.state.restart('AlternateLivingRoom');
+		game.state.restart('LivingRoom');
+		game.state.start('LivingRoom');
+	}
+	else if(game.state.current == 'BedRoom')
+	{
+		firstTimeBedroom = 0;
+		usedCloset = 0;
+		havePendant = 0;
+		game.state.restart('BedRoom');
+	}
+	else if(game.state.current == 'AlternateBedRoom')
+	{
+		firstTimeBedroom = 0;
+		usedCloset = 0;
+		havePendant = 0;
+		passMirror = 0;
+		passDresser = 0;
+		flipSide = 0;
+		placedPendant = 0;
+		haveKey = 0;
+		game.state.restart('AlternateBedRoom');
+		game.state.restart('BedRoom');
+		game.state.start('BedRoom');
+	}
+	else if(game.state.current == 'Backyard')
+	{
+		game.state.restart('Backyard');
+	}
+}
+/*-------------------------------------------------------*/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Globals to carry from FD
-var placedBottle = 0;
-var cycle = 0;
-
-// GamePlay State
+/*-----------------------FrontDoor-----------------------*/
 var FrontDoor = function(game){};
 FrontDoor.prototype =
 {
@@ -252,7 +277,6 @@ FrontDoor.prototype =
 		this.pickup = game.add.audio('pickup');
 
 		// Initalizing Variables
-		//playerSpeed = 600;
 		usedApple = 0;
 		usedPlant = 0;
 		readNewspaper = 0;
@@ -261,9 +285,8 @@ FrontDoor.prototype =
 
 		// Starting Up Physics and Music
 		game.physics.startSystem(Phaser.Physics.Arcade);
-		// game.music = game.add.audio('shades');
-		// game.music .play('', 0, 1.0, true);
 
+		//Putting Sprites Into the State
 		front_bg = game.add.sprite(0, 0, 'megaAtlas', 'outside_front');
 
 		ground = game.add.group();
@@ -281,16 +304,11 @@ FrontDoor.prototype =
 		porch_steps3 = ground.create(game.width-194, game.height-43, 'megaAtlas', 'porch_step2');
 		porch_steps3.body.immovable = true;
 
-
-
 		door = game.add.sprite(game.width - 5, game.height - 107, 'megaAtlas', 'front_door');
 		game.physics.arcade.enable(door);
 		door.enableBody = true;
 		door.body.immovable = true;
 		door.body.setSize(10,65,-5,0);
-
-		// newspaper = game.add.sprite(70, game.height - 39, 'newspaper');
-		// game.physics.arcade.enable(newspaper);
 
 		apple = game.add.sprite(game.width - 97, game.height - 65, 'megaAtlas', 'apple');
 		game.physics.arcade.enable(apple);
@@ -320,10 +338,9 @@ FrontDoor.prototype =
 		this.keyPickup = this.keyObj.create(game.width - 270, game.height - 38, 'megaAtlas', 'key');
 		this.keyPickup.alpha = 0.0;
 
-		var emitter = game.add.emitter(400, -100, 800);
+		//Creating Rain Emitter
+		var emitter = game.add.emitter(450, -100, 800);
         emitter.width = game.world.width;
-        //emitter.angle = 20; // uncomment to set an angle for the rain.
-
 
         emitter.makeParticles('rain');
         emitter.minParticleScale = .5;
@@ -337,12 +354,8 @@ FrontDoor.prototype =
 
         emitter.start(false, 700, 5, 0);
 
-        // Transition Test
-  //       transition = game.add.sprite(0, 0, 'transition_atlas', 'transition1');
-		// transition.animations.add('close', Phaser.Animation.generateFrameNames('transition', 1, 9), 4, false);
-		// transition.animations.play('close');
-
 	},
+	//Functions for Functionality :^)
 	switchLivingRoom: function()
 	{
 		game.state.start("LivingRoom");
@@ -385,20 +398,13 @@ FrontDoor.prototype =
 	},
 	update: function()
 	{
-		// render();
 		// Collision detection between groups
-		var hitGround = game.physics.arcade.collide(player, ground);	// Collision b/t player and platforms
-		// player.body.gravity.y = 350;	// Simulate gravity by applying a force in the y-axis
-		// player.body.velocity.x = 0;		// Stills horizontal velocity
+		var hitGround = game.physics.arcade.collide(player, ground);
 
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
 		{
 			game.physics.arcade.collide(player, door, this.interactDoor, null, this);
 		}
-
-
-		// Checks for input of player to determine direction of movement
-
 		if(cycle > 0)
 		{
 			interactable = 1;
@@ -435,12 +441,6 @@ FrontDoor.prototype =
 			player.scale.setTo(-1.0, 1);
 			player.animations.play('walk');
 		}
-		// else if(game.input.keyboard.isDown(Phaser.Keyboard.UP) && player.body.touching.down && hitGround)
-		// {
-		// 	player.body.velocity.y = -100;
-		// 	player.scale.setTo(-1.0, 1);
-		// 	player.animations.play('walk');
-		// }
 		else
 		{
 			player.body.velocity.x = 0;
@@ -448,52 +448,8 @@ FrontDoor.prototype =
 		}
 	}
 }
-function render() {
-//call renderGroup on each of the alive members
-	// game.debug.body(mirror);
-	// game.debug.body(player);
-	//game.debug.body(portrait)
-	// game.debug.body(wineCabinet);
-	// game.debug.body(bedDoor);
-	// game.debug.body(cat1);
-	// game.debug.body(mirror_stand);
-	// game.debug.body(small_cabinet);
-	// game.debug.body(bedroom_bed);
-	// game.debug.body(bedroom_cabinet);
-	// game.debug.body(closet);
-	// game.debug.body(closet_door);
-	game.debug.body(player);
-	ground.forEach(game.debug.body, game.debug);
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Global Variables to keep track of events
-var bottleBroke = 0;
-var mirrorTurned = 0;
-var revealAlternate = 0;
-
-// GamePlay State
+/*-----------------------LivingRoom-----------------------*/
 var LivingRoom = function(game){};
 LivingRoom.prototype =
 {
@@ -509,7 +465,6 @@ LivingRoom.prototype =
 		musicTrack2.play('', 0, 1.0, true);
 
 		// Creating instances of Audio
-		this.walk_sfx = game.add.audio('walk_sfx');
 		this.scream = game.add.audio('scream');
 		this.beep = game.add.audio('beep');
 		this.click = game.add.audio('click');
@@ -640,7 +595,6 @@ LivingRoom.prototype =
 	},
 	update: function()
 	{
-		// render();
 		var bottleBreak = game.physics.arcade.collide(player, this.wineCabinetTrigger);
 		var mirrorTurn = game.physics.arcade.collide(player, this.catTrigger);
 		
@@ -691,25 +645,7 @@ LivingRoom.prototype =
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-// Global Variables to keep track of events
-var bottleBroke = 0;
-var mirrorTurned = 0;
-var revealAlternate = 0;
-var ghostLook = 0.5;
-var haveBottle = 0;
-
-// GamePlay State
+/*-----------------------Alternate LivingRoom-----------------------*/
 var AlternateLivingRoom = function(game){};
 AlternateLivingRoom.prototype =
 {
@@ -729,9 +665,6 @@ AlternateLivingRoom.prototype =
 		this.disableInput = 0;
 
 		// Creating instances of Audio
-		this.walk_sfx = game.add.audio('walk_sfx');
-		//this.scream = game.add.audio('scream');
-		//this.beep = game.add.audio('beep');
 		this.click = game.add.audio('click');
 		this.locked = game.add.audio('locked');
 		this.opened = game.add.audio('opened');
@@ -849,7 +782,7 @@ AlternateLivingRoom.prototype =
 	},
 	update: function()
 	{
-		// render();
+		//Render the Smokey Ambience
 		this.fire.update();	
 
 		// Checking overlap for interactions
@@ -908,18 +841,7 @@ AlternateLivingRoom.prototype =
 	}
 }
 
-
-
-
-
-
-
-
-// Initalilzing globals needed for this level
-var firstTimeBedroom = 0;
-var usedCloset = 0;
-var havePendant = 0;
-
+/*-----------------------BedRoom-----------------------*/
 var BedRoom = function(game){};
 BedRoom.prototype =
 {
@@ -939,9 +861,6 @@ BedRoom.prototype =
 		musicTrack2.play('', 0, 1, true);
 
 		// Creating instances of Audio
-		this.walk_sfx = game.add.audio('walk_sfx');
-		//this.scream = game.add.audio('scream');
-		//this.beep = game.add.audio('beep');
 		this.click = game.add.audio('click');
 		this.locked = game.add.audio('locked');
 		this.opened = game.add.audio('opened');
@@ -972,9 +891,6 @@ BedRoom.prototype =
 		this.smallCabinet = game.add.sprite(100, 99, 'megaAtlas', 'small_cabinet');
 		this.candle = game.add.sprite(115, 87, 'megaAtlas', 'candle_lit');
 		this.normalPortrait = game.add.sprite(game.width/3 - 33, 10, 'megaAtlas', 'normal_picture');
-		//this.door = game.add.sprite(2, 99, 'megaAtlas', 'door');
-		//this.door.anchor.setTo(0.5, 0.5);
-		//this.door.scale.x *= -1;
 
 		if(firstTimeBedroom == 0)
 		{
@@ -986,9 +902,6 @@ BedRoom.prototype =
 		}
 
 		this.catDresser = game.add.sprite(353, 80, 'megaAtlas', 'laying_cat');
-		// this.catDTrigger = game.add.sprite(335, 105, 'trigger');
-		// this.catDTrigger.scale.setTo(0.2, 0.8);
-		// this.catDTrigger.alpha = 1.0;
 
 		this.pendant = game.add.sprite(game.width/2, game.height - 69, 'megaAtlas', 'necklase');
 		this.pendant.alpha = 1.0;
@@ -1055,7 +968,6 @@ BedRoom.prototype =
 	update: function()
 	{
 		// Collision Trigger Events
-		// render();
 		var passCat = game.physics.arcade.collide(player, this.catTrigger);
 
 		if(passCat && firstTimeBedroom == 0)
@@ -1104,16 +1016,7 @@ BedRoom.prototype =
 	}
 }
 
-
-
-
-
-var passMirror = 0;
-var passDresser = 0;
-var flipSide = 0;
-var placedPendant = 0;
-var haveKey = 0;
-
+/*-----------------------Alternate BedRoom-----------------------*/
 var AlternateBedRoom = function(game){};
 AlternateBedRoom.prototype =
 {
@@ -1128,9 +1031,6 @@ AlternateBedRoom.prototype =
 		musicTrack3.play('', 0, 3.0, true);		// Maybe 2.5
 
 		// Creating instances of Audio
-		this.walk_sfx = game.add.audio('walk_sfx');
-		//this.scream = game.add.audio('scream');
-		//this.beep = game.add.audio('beep');
 		this.click = game.add.audio('click');
 		this.locked = game.add.audio('locked');
 		this.opened = game.add.audio('opened');
@@ -1159,12 +1059,9 @@ AlternateBedRoom.prototype =
 		this.walls.enableBody = true;
 		this.wall = this.walls.create(game.width/2 - 93, 38, 'megaAtlas', 'wall_structure');	// FIX THE GODDAM WALL
 		this.wall.body.immovable = true;
-		// this.wall.enableBody = true;
-		// this.wall.body.immovable = true;
 		this.wall2 = this.walls.create(game.width/2 + 27, 0, 'megaAtlas', 'wall_structure');
 		this.wall2.body.immovable = true;
-		// this.wall2.enableBody = true;
-		// this.wall2.body.immovable = true;
+
 		if (passDresser == 0)
 		{
 			this.brokenCabinet.alpha = 0;
@@ -1272,11 +1169,13 @@ AlternateBedRoom.prototype =
 	},
 	update: function()
 	{
-		// render();
+		//Render Smokey Ambience
 		this.fire.update();
+
 		var hitfloor = game.physics.arcade.collide(player, ground);
 		var collideWall = game.physics.arcade.collide(player, this.wall);
 		var collideWall = game.physics.arcade.collide(player, this.wall2);
+
 		// Checking overlap to pick up items
 		if(usedCloset == 0)
 		{
@@ -1315,14 +1214,12 @@ AlternateBedRoom.prototype =
         	flipSide = 0;
         	player.scale.y = 1.0;
         	player.body.gravity.y = 30;
-        	// player.position.y = game.height-45;
         }
         else if(game.input.keyboard.justPressed(Phaser.Keyboard.TILDE) && flipSide == 0)
         {
         	flipSide = 1;
         	player.scale.y = -1.0;
         	player.body.gravity.y = -20;
-        	// player.position.y = 0;
         }
 		if(game.input.keyboard.isDown(Phaser.Keyboard.Y) && disableInput == 0)
 		{
@@ -1344,7 +1241,7 @@ AlternateBedRoom.prototype =
 	}
 }
 
-//---------BACKYARD-----------------------------------
+/*-----------------------BackYard-----------------------*/
 var Backyard = function(game){};
 Backyard.prototype =
     {
