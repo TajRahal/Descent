@@ -52,6 +52,8 @@ Boot.prototype =
 		//Loading Atlas of All Sprites and Menu Images
 		game.load.atlas('megaAtlas', 'assets/img/megaAtlas.png', 'assets/img/megaAtlas.json')
 		game.load.image('pause', 'assets/img/pause.png');
+		game.load.image('loading', 'assets/img/loading.png');
+		game.load.image('credit', 'assets/img/credits.png');
 
 		//Loading Rain Spritesheet for Emitter System
 		game.load.spritesheet('rain', 'assets/img/rain.png');
@@ -84,6 +86,7 @@ Boot.prototype =
 	},
 	create: function()
 	{
+		game.add.sprite(163, 20, 'loading');
 		musicTrack1 = new Phaser.Sound(game, 'shades', 1, true);
 		game.scale.pageAlignHorizontally = true;
 		game.scale.pageAlignVertically = true;
@@ -93,7 +96,6 @@ Boot.prototype =
 	update: function()
 	{
 		if (musicTrack1.isDecoded == true){
-			console.log('decoded');
 			game.state.start('MainMenu');
 		}
 	}
@@ -109,12 +111,12 @@ MainMenu.prototype =
 		musicTrack1 = game.add.audio('shades');
 		game.sound.setDecodedCallback([ musicTrack1 ], this.startMusic, this);
 
-		var titleImage = game.add.image(game.width/2, 50, 'megaAtlas', 'Descent_Title');
-        titleImage.anchor.setTo(0.5, 1);
+		var titleImage = game.add.image(187, 20, 'megaAtlas', 'Descent_Title');
+        //titleImage.anchor.setTo(1, 1);
         titleImage.alpha = 0;
         game.add.tween(titleImage).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true);
 
-		var space = game.add.image(game.width/2, 140, 'megaAtlas', 'press_space');
+		var space = game.add.image(game.width/2 -2, 140, 'megaAtlas', 'press_space');
         space.anchor.setTo(0.5, 1);
         space.alpha = 0;
         game.add.tween(space).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
@@ -122,6 +124,31 @@ MainMenu.prototype =
 	startMusic: function()
 	{
 		musicTrack1.play('', 0, 0.7, true);
+	},
+	update: function()
+	{
+		if(game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR))
+		{
+			game.state.start('Instructions');
+		}
+	}
+}
+
+/*-----------------------Minimalist Instructions :^)-----------------------*/
+var Instructions = function(game){};
+Instructions.prototype =
+{
+
+	create: function()
+	{
+		var style1 = {fill: 'red', fontSize: '24px'};
+		var style2 = {fill: 'white', fontSize: '16px'};
+		game.add.text(game.width/4+ 65, 0, 'Instructions:', style1);
+		game.add.text(game.width/4+ 65, 40, 'Left Arrow Key (<-)', style2);
+		game.add.text(game.width/4+ 65, 60, 'Right Arrow Key (->)', style2);
+		game.add.text(game.width/4+ 65, 80, 'Space Bar For Doors', style2);
+		game.add.text(game.width/4+ 65, 100, 'ESC to Pause', style2);
+		game.add.text(game.width/4+ 65, 125, 'Press Space', style1);
 	},
 	update: function()
 	{
@@ -138,17 +165,17 @@ MainMenu.prototype =
 window.onkeydown = function(event) {
 	// capture keycode (event.which for Firefox compatibility)
 	var keycode = event.keyCode || event.which;
-	var pauseKey = event.keyCode || event.which;
+	//var pauseKey = event.keyCode || event.which;
 	if(keycode === Phaser.Keyboard.ESC) 
 	{
 		pauseGame();
 	}
-	if (pauseKey === Phaser.Keyboard.Q && game.paused)
+	if (keycode === Phaser.Keyboard.Q && game.paused)
 	{
 		game.paused = false;
 		quitGame();
 	}
-	if (pauseKey === Phaser.Keyboard.R && game.paused)
+	if (keycode === Phaser.Keyboard.R && game.paused)
 	{
 		game.paused = false;
 		resetLevel();
@@ -164,7 +191,6 @@ function pauseGame()
 
 	if(game.paused){
 		pause_menu.anchor.setTo(0.5, 0.5);
-	
 	}
 }
 
@@ -230,14 +256,14 @@ function resetLevel()
 	}
 	else if(game.state.current == 'BedRoom')
 	{
-		firstTimeBedroom = 0;
+		//firstTimeBedroom = 0;
 		usedCloset = 0;
 		havePendant = 0;
 		game.state.restart('BedRoom');
 	}
 	else if(game.state.current == 'AlternateBedRoom')
 	{
-		firstTimeBedroom = 0;
+		//firstTimeBedroom = 0;
 		usedCloset = 0;
 		havePendant = 0;
 		passMirror = 0;
@@ -246,7 +272,7 @@ function resetLevel()
 		placedPendant = 0;
 		haveKey = 0;
 		game.state.restart('AlternateBedRoom');
-		game.state.restart('BedRoom');
+		// game.state.restart('BedRoom');
 		game.state.start('BedRoom');
 	}
 	else if(game.state.current == 'Backyard')
@@ -355,7 +381,7 @@ FrontDoor.prototype =
         emitter.start(false, 700, 5, 0);
 
 	},
-	//Functions for Functionality :^)
+	//Functions for Functionality
 	switchLivingRoom: function()
 	{
 		game.state.start("LivingRoom");
@@ -560,6 +586,7 @@ LivingRoom.prototype =
 
 		game.physics.arcade.enable([this.couch, this.wineCabinet, this.wineCabinetTrigger, this.brokeWineCabinet, this.mirror, this.frontDoor, this.bedDoor, this.cat, this.catTrigger]);
 	},
+	//Functions for Functionality
 	bottlePrompt: function()
 	{
 		this.meow.play('', 0, 1, false);
@@ -755,6 +782,7 @@ AlternateLivingRoom.prototype =
 
 		game.physics.arcade.enable([this.LRDoor, this.fakeDoor, this.crackedBottle]);
 	},
+	//Functions for Functionality
 	interactDoor: function()
 	{
 		this.opened.play('', 0, 1, false);
@@ -892,15 +920,14 @@ BedRoom.prototype =
 		this.candle = game.add.sprite(115, 87, 'megaAtlas', 'candle_lit');
 		this.normalPortrait = game.add.sprite(game.width/3 - 33, 10, 'megaAtlas', 'normal_picture');
 
-		if(firstTimeBedroom == 0)
-		{
+		if (firstTimeBedroom == 0) {
 			this.catTrigger = game.add.sprite(180, 117, 'megaAtlas', 'greenbox');
 			this.catTrigger.scale.setTo(0.2, 0.8);
 			this.catTrigger.alpha = 0.0;
-			this.bedCat = game.add.sprite(0, 0, 'megaAtlas', 'cat-run-1');
-			cat_run = this.bedCat.animations.add('megaAtlas', ['cat-run-1', 'cat-run-2', 'cat-run-3', 'cat-run-4', 'cat-run-5', 'cat-run-6', 'cat-run-7', 'cat-run-8', 'cat-run-9', 'cat-run-10', 'cat-run-11']);
+			this.bedCat = game.add.sprite(0, 0, 'megaAtlas', 'cat-run-1');	
+			this.bedCat.animations.add('cat_run', ['cat-run-1', 'cat-run-2', 'cat-run-3', 'cat-run-4', 'cat-run-5', 'cat-run-6', 'cat-run-7', 'cat-run-8', 'cat-run-9', 'cat-run-10', 'cat-run-11']);
 		}
-
+		
 		this.catDresser = game.add.sprite(353, 80, 'megaAtlas', 'laying_cat');
 
 		this.pendant = game.add.sprite(game.width/2, game.height - 69, 'megaAtlas', 'necklase');
@@ -924,7 +951,7 @@ BedRoom.prototype =
 		game.physics.arcade.enable([this.cabinet, this.closetDoor, this.catTrigger, this.pendant, this.backyardDoor]);
 
 	},
-
+	//Functions for Functionality
 	interactDoor2: function()
 	{
 		this.opened.play('', 0, 1, false);
@@ -932,6 +959,7 @@ BedRoom.prototype =
 	},
 	switchState: function()
 	{
+		musicTrack2.stop();
 		game.state.start("AlternateBedRoom");
 	},
 	closetDelay: function()
@@ -949,7 +977,8 @@ BedRoom.prototype =
 	playCatAnimation: function()
 	{
 		firstTimeBedroom = 1;
-		cat_run.play(10, false, true);
+		this.bedCat.animations.play('cat_run', 10, false, true);
+		this.disableInput = 0;
 	},
 	meowIndicate: function()
 	{
@@ -970,7 +999,7 @@ BedRoom.prototype =
 		// Collision Trigger Events
 		var passCat = game.physics.arcade.collide(player, this.catTrigger);
 
-		if(passCat && firstTimeBedroom == 0)
+		if(passCat)
 		{
 			this.catTrigger.kill();
 			this.disableInput = 1;
@@ -978,10 +1007,10 @@ BedRoom.prototype =
 			this.meow.onStop.add(this.playCatAnimation, this);
 		}
 		
-		if(cat_run.isFinished == true)
-		{
-			this.disableInput = 0;
-		}
+		// if(this.bedCat.animations.isFinished == true)
+		// {
+		// 	this.disableInput = 0;
+		// }
 
 		// Checking Overlap to Pick up Objectives
 		if(usedCloset == 0)
@@ -1113,6 +1142,7 @@ AlternateBedRoom.prototype =
 		this.fire.alpha = 0.0;
 		this.background.filters = [this.fire];
 	},
+	//Functions for Functionality
 	changeState: function()
 	{
 		musicTrack3.stop();
@@ -1244,119 +1274,136 @@ AlternateBedRoom.prototype =
 /*-----------------------BackYard-----------------------*/
 var Backyard = function(game){};
 Backyard.prototype =
+{
+    create: function () 
     {
-        create: function () {
+    	this.appleDrop = 0;
+    	disableInput = 0;
 
-        	this.appleDrop = 0;
-        	disableInput = 0;
+    	// Rain BGM
+    	musicTrack1 = game.add.audio('rain');
+    	musicTrack1.play('', 0, 0.60, true);
 
-        	// Rain BGM
-        	musicTrack1 = game.add.audio('rain');
-        	musicTrack1.play('', 0, 0.60, true);
+        game.add.sprite(0, 0, 'megaAtlas', 'backyard_bg');
+        this.locked = game.add.audio('locked');
 
-            game.add.sprite(0, 0, 'megaAtlas', 'backyard_bg');
-            this.locked = game.add.audio('locked');
+        this.tree = game.add.sprite(352, 0, 'megaAtlas', 'tree');
+        this.appleTrigger = game.add.sprite(379, 120, 'megaAtlas', 'greenbox');
+        this.appleTrigger.scale.setTo(0.2, 0.2);
+        this.appleTrigger.alpha = 0.0;
+        ground = game.add.group();
+		ground.enableBody = true;
 
-            this.tree = game.add.sprite(352, 0, 'megaAtlas', 'tree');
-            this.appleTrigger = game.add.sprite(379, 120, 'megaAtlas', 'greenbox');
-            this.appleTrigger.scale.setTo(0.2, 0.2);
-            this.appleTrigger.alpha = 0.0;
-            ground = game.add.group();
-			ground.enableBody = true;
+		this.backyard_ground = ground.create(0, 129, 'megaAtlas', 'backyard_ground');
+		this.backyard_ground.body.immovable = true;
+		this.backyard_cement_ground = ground.create(0, 126, 'megaAtlas', 'backyard_cement_ground');
+		this.backyard_cement_ground.body.immovable = true;
 
-			this.backyard_ground = ground.create(0, 129, 'megaAtlas', 'backyard_ground');
-			this.backyard_ground.body.immovable = true;
-			this.backyard_cement_ground = ground.create(0, 126, 'megaAtlas', 'backyard_cement_ground');
-			this.backyard_cement_ground.body.immovable = true;
+        player = game.add.sprite(40, game.height - 56, 'megaAtlas', 'player-idle');
+        player.anchor.setTo(0.5, 0.5);
 
-            player = game.add.sprite(40, game.height - 56, 'megaAtlas', 'player-idle');
-            player.anchor.setTo(0.5, 0.5);
+        // Player Physics
+        game.physics.arcade.enable([player, this.appleTrigger]);
+        player.body.setSize(12, 30, 4, 2);
+        // player.body.bounce.y = 0.1;
+        player.body.gravity.y = 1200;
+        player.body.collideWorldBounds = true;
 
-            // Player Physics
-            game.physics.arcade.enable([player, this.appleTrigger]);
-            player.body.setSize(12, 30, 4, 2);
-            // player.body.bounce.y = 0.1;
-            player.body.gravity.y = 1200;
-            player.body.collideWorldBounds = true;
+        this.apple = game.add.sprite(368, 73, 'megaAtlas', 'apple');
 
-            this.apple = game.add.sprite(368, 73, 'megaAtlas', 'apple');
+        // Player Animations
+        player.animations.add('idle', ['player-idle'], 0, false);
+        player.animations.add('walk', Phaser.Animation.generateFrameNames('player-walk-0', 1, 6), 10, true);
+        player.animations.play('idle');
 
-            // Player Animations
-            player.animations.add('idle', ['player-idle'], 0, false);
-            player.animations.add('walk', Phaser.Animation.generateFrameNames('player-walk-0', 1, 6), 10, true);
-            player.animations.play('idle');
-
-            var emitter = game.add.emitter(400, -100, 600);
-            emitter.width = game.world.width;
-            //emitter.angle = 20; // uncomment to set an angle for the rain.
+        var emitter = game.add.emitter(400, -100, 600);
+        emitter.width = game.world.width;
+        //emitter.angle = 20; // uncomment to set an angle for the rain.
 
 
-            emitter.makeParticles('rain');
-            emitter.minParticleScale = 1;
-            emitter.maxParticleScale = 1.5;
+        emitter.makeParticles('rain');
+        emitter.minParticleScale = 1;
+        emitter.maxParticleScale = 1.5;
 
-            emitter.setYSpeed(500, 500);
-            emitter.setXSpeed(-400, -200);
+        emitter.setYSpeed(500, 500);
+        emitter.setXSpeed(-400, -200);
 
-            emitter.minRotation = 0;
-            emitter.maxRotation = 0;
+        emitter.minRotation = 0;
+        emitter.maxRotation = 0;
 
-            emitter.start(false, 700, 5, 0);
-        },
-        appleFall: function()
-        {
-        	disableInput = 1;
-        	this.appleTrigger.kill();
-        	this.appleDrop = 1;
-        },
-        update: function () {
-			// render();
-        	var hitGround = game.physics.arcade.collide(player, ground);
-        	var underApple = game.physics.arcade.collide(player, this.appleTrigger);
+        emitter.start(false, 700, 5, 0);
+    },
+    //Functions for Functionality
+    appleFall: function()
+    {
+    	disableInput = 1;
+    	this.appleTrigger.kill();
+    	this.appleDrop = 1;
+    },
+    update: function () 
+    {
+    	var hitGround = game.physics.arcade.collide(player, ground);
+    	var underApple = game.physics.arcade.collide(player, this.appleTrigger);
 
-        	if(underApple)
-        	{
-        		this.appleFall();
-        	}
-        	if(this.appleDrop == 1)
-        	{
-        		this.apple.position.y += 1;
-        	}
-        	if(this.apple.position.y == player.position.y - 16)
-        	{
-        		game.state.start('MainMenu');
-        	}
+    	if(underApple)
+    	{
+    		this.appleFall();
+    	}
+    	if(this.appleDrop == 1)
+    	{
+    		this.apple.position.y += 1;
+    	}
+    	if(this.apple.position.y == player.position.y - 16)
+    	{
+    		game.state.start('Credit');
+    	}
 
-            if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && disableInput == 0) {
-                player.body.velocity.x = playerSpeed;
-                player.scale.setTo(1.0, 1.0);
-                player.animations.play('walk');
-            }
-            else if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT) && disableInput == 0) {
-                player.body.velocity.x = -playerSpeed;
-                player.scale.setTo(-1.0, 1);
-                player.animations.play('walk');
-            }
-            else
-			{
-				player.body.velocity.x = 0;
-				player.animations.play('idle')
-			}
+        if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT) && disableInput == 0) {
+            player.body.velocity.x = playerSpeed;
+            player.scale.setTo(1.0, 1.0);
+            player.animations.play('walk');
+        }
+        else if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT) && disableInput == 0) {
+            player.body.velocity.x = -playerSpeed;
+            player.scale.setTo(-1.0, 1);
+            player.animations.play('walk');
+        }
+        else
+		{
+			player.body.velocity.x = 0;
+			player.animations.play('idle')
+		}
+    },
+}
 
-        },
-
-
+var Credit = function(game){};
+Credit.prototype =
+{
+    create: function()
+    {
+        credit = game.add.sprite(0,0,'credit');
+    },
+    update: function()
+    {	
+    	game.time.events.add(5000, function() 
+    	{
+            game.add.tween(credit).to({y: 0}, 500, Phaser.Easing.Linear.None, true);
+            game.add.tween(credit).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+        }, this);
+        game.time.events.add(10000, function()
+    	{
+    		quitGame();
+    	}, this);
     }
+}
 
-/*
- * Add states to the StateManager
- */
+/* Add states to the StateManager */
 game.state.add('MainMenu', MainMenu);
-
-// Game "Levels"
+game.state.add('Instructions', Instructions);
 game.state.add('FrontDoor', FrontDoor);
 game.state.add('LivingRoom', LivingRoom);
 game.state.add('AlternateLivingRoom', AlternateLivingRoom);
 game.state.add('BedRoom', BedRoom);
 game.state.add('AlternateBedRoom', AlternateBedRoom);
 game.state.add('Backyard', Backyard);
+game.state.add('Credit', Credit);
